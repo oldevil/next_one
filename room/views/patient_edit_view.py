@@ -1,11 +1,14 @@
 import logging
+import datetime
+import ast
 
 from room.models.patient import Patient
 from room.models.room import Room
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from rest_framework import status
 from django.template import loader
 from utils.detail import Type, Success, Error
+from django.urls import reverse
 
 logger = logging.getLogger('patient')
 
@@ -18,6 +21,7 @@ def patient_detail(request, patient_id):
         'surgeon': patient.surgeon,
         'assistant': patient.assistant,
         'room_number': patient.room_number if patient.room_number else '',
+        'submit': '修改',
     }
     template = loader.get_template('room/patient_detail.html')
     return HttpResponse(template.render(context, request))
@@ -29,6 +33,7 @@ def patient_create(request):
         'surgeon': '',
         'assistant': '',
         'room_number': '',
+        'submit': '新建',
     }
     template = loader.get_template('room/patient_detail.html')
     return HttpResponse(template.render(context, request))
@@ -65,4 +70,24 @@ def patient_edit(request):
         'detail': detail
     }
     logger.info(log_detail)
-    return HttpResponse(detail, status=status_code)
+    return HttpResponseRedirect(reverse('room:room_index'))
+    # return HttpResponse(detail, status=status_code)
+
+
+def patient_get_in(request, patient_id):
+    # TODO logger
+    patient = Patient.objects.get(pk=patient_id)
+    patient.status = 1
+    patient.save()
+
+    room = Room.objects.filter(number=patient.room_number)[0]
+    if room.current_patient:
+        room.current_patient.delete()
+    room.current_patient = patient
+    room.entry_time = datetime.datetime.now()
+    patient_queue = ast.literal_eval(room.patient_queue)
+    patient_queue.pop(0)
+    room.patient_queue = str(patient_queue)
+    room.save()
+
+    return HttpResponseRedirect(reverse('room:room_index'))

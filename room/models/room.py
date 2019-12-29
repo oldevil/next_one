@@ -1,8 +1,8 @@
 import ast
+import datetime
 
 from django.db import models
 from room.models.patient import Patient
-import datetime
 
 
 class Room(models.Model):
@@ -22,3 +22,8 @@ class Room(models.Model):
         queue.remove(patient_id)
         self.patient_queue = str(queue)
         self.save()
+
+    def get_next_patient(self):
+        if self.patient_queue == '[]':
+            return None
+        return Patient.objects.get(pk=ast.literal_eval(self.patient_queue)[0])

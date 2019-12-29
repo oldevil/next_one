@@ -1,0 +1,5 @@
+<ol>
+    {% for patient in patients %}
+        <li><a href="{% url 'room:patient_detail' patient.id %}">{{ patient.name }}</a></li>
+    {% endfor%}
+</ol>

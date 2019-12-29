@@ -1,0 +1,20 @@
+{% for room in rooms %}
+    <fieldset>
+        <legend><a href="{% url 'room:room_detail' room.id %}">OR {{ room.number }}</a></legend>
+            {% if room.current_patient %}
+                当前患者：{{ room.current_patient.name}}<br>
+                主诊：{{ room.current_patient.surgeon}}<br>
+                一助：{{ room.current_patient.assistant}}<br>
+                入室时间：{{ room.entry_time }}<br>
+            {% else %}
+                当前患者：无
+            {% endif %}
+            {% if room.get_next_patient %}
+                Next One：{{ room.get_next_patient.name }} <a href="{% url 'room:patient_get_in' room.get_next_patient.id %}">入室</a>
+            {% else %}
+                Next One：Well Done!
+            {% endif %}
+    </fieldset>
+{% endfor%}
+
+<a href="{% url 'room:patient_create' %}">新患者</a>
