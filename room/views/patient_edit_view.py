@@ -4,7 +4,7 @@ import ast
 
 from room.models.patient import Patient
 from room.models.room import Room
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from rest_framework import status
 from django.template import loader
 from utils.detail import Type, Success, Error
@@ -71,7 +71,7 @@ def patient_edit(request):
     }
     logger.info(log_detail)
     return HttpResponseRedirect(reverse('room:room_index'))
-    # return HttpResponse(detail, status=status_code)
+    # return JsonResponse(detail, safe=False)
 
 
 def patient_get_in(request, patient_id):

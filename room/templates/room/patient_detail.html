@@ -1,8 +1,26 @@
-<form name="edit" action="{% url 'room:patient_edit'%}" method="post">
-    姓名: <input type="text" name="name" value="{{ name }}"><br>
-    主刀: <input type="text" name="surgeon" value="{{ surgeon }}"><br>
-    一助: <input type="text" name="assistant" value="{{ assistant }}"><br>
-    手术室: <input type="text" name="room_number" value="{{ room_number }}"><br>
-    {% if id %}<input type="hidden" name="id" value="{{ id }}">{% endif %}
-    <input type="submit" value="{{ submit }}">
-</form>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="http://apps.bdimg.com/libs/jquerymobile/1.4.5/jquery.mobile-1.4.5.min.css">
+    <script src="http://apps.bdimg.com/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script src="http://apps.bdimg.com/libs/jquerymobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+</head>
+
+<body>
+<div data-role="page">
+    <div data-role="header" data-position="fixed">
+        <h1>Next One</h1>
+    </div>
+    <div data-role="main" class="ui-content">
+        <form name="edit" action="{% url 'room:patient_edit'%}" method="post" data-ajax="false" data-inset="true">
+            姓名: <input type="text" name="name" value="{{ name }}"><br>
+            主刀: <input type="text" name="surgeon" value="{{ surgeon }}"><br>
+            一助: <input type="text" name="assistant" value="{{ assistant }}"><br>
+            手术室: <input type="text" name="room_number" value="{{ room_number }}"><br>
+            {% if id %}<input type="hidden" name="id" value="{{ id }}">{% endif %}
+            <input type="submit" value="{{ submit }}">
+        </form>
+    </div>
+    <div data-role="footer" data-position="fixed" style="text-align:center;">
+    </div>
+</div>
+</body>

@@ -1,5 +1,54 @@
-<ol>
-    {% for patient in patients %}
-        <li><a href="{% url 'room:patient_detail' patient.id %}">{{ patient.name }}</a></li>
-    {% endfor%}
-</ol>
+{% load staticfiles %}
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="http://apps.bdimg.com/libs/jquerymobile/1.4.5/jquery.mobile-1.4.5.min.css">
+    <script src="http://apps.bdimg.com/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script src="http://apps.bdimg.com/libs/jquerymobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+    <script src="{% static 'Sortable/Sortable.js' %}"></script>
+</head>
+
+<body>
+<div data-role="page">
+    <div data-role="header" data-position="fixed">
+        <h1>Next One</h1>
+    </div>
+    <div data-role="main" class="ui-content">
+    <ul data-role="listview" data-inset="true" data-icon="false" id="items">
+        {% for patient in patients %}
+            <li data-id="{{ patient.id }}"><a href="{% url 'room:patient_detail' patient.id %}" data-ajax="false">{{ patient.name }}</a></li>
+        {% endfor%}
+    </ul>
+    </div>
+    <div data-role="footer" data-position="fixed" style="text-align:center;">
+        <button onclick="toggleDrag()" id="toggle">开始排序</button>
+    </div>
+</div>
+</body>
+
+<script>
+    let el = document.getElementById('items');
+    let sortable = Sortable.create(el, {
+        disabled: true,
+        onUpdate: function () {
+            let order = sortable.toArray();
+            let positions = '[' + order.join(', ') + ']';
+            jQuery.ajax({
+                url: "{% url 'room:room_update_queue' room.id %}",
+                type: 'POST',
+                data: {
+                    patient_queue: positions
+                },
+            });
+
+            console.log({
+                positions: positions
+            })
+        },
+    });
+
+    function toggleDrag() {
+        sortable.options.disabled = !sortable.options.disabled;
+        let toggle = document.getElementById('toggle');
+        toggle.textContent = (toggle.textContent === '开始排序') ? '停止排序' : '开始排序';
+    }
+</script>

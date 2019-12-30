@@ -129,4 +129,6 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"), '/var/www/static/',)
+
 logging.basicConfig(filename='log/next_one.log', format='[%(asctime)s] [%(levelname)s] [%(name)s] [%(message)s]', level='INFO')

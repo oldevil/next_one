@@ -26,7 +26,20 @@ def room_detail(request, room_id):
     patient_queue = ast.literal_eval(room.patient_queue)
     patients = [Patient.objects.get(pk=i) for i in patient_queue]
     context = {
+        'room': room,
         'patients': patients,
     }
     template = loader.get_template('room/room_detail.html')
     return HttpResponse(template.render(context, request))
+
+
+def room_update_queue(request, room_id):
+    patient_queue = request.POST.get('patient_queue')
+    room = Room.objects.get(pk=room_id)
+    room.patient_queue = patient_queue
+    room.save()
+    detail = {
+        # TODO
+        'id': room.id,
+    }
+    return HttpResponse(detail, status=status.HTTP_200_OK)

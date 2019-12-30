@@ -1,13 +1,14 @@
 from django.urls import path
 
 from room.views.patient_edit_view import patient_detail, patient_create, patient_edit, patient_get_in
-from room.views.room_view import room_index, room_detail
+from room.views.room_view import room_index, room_detail, room_update_queue
 
 app_name = 'room'
 
 urlpatterns = [
     path('', room_index, name='room_index'),
     path('<int:room_id>/', room_detail, name='room_detail'),
+    path('<int:room_id>/room_update_queue/', room_update_queue, name='room_update_queue'),
     path('patient/', patient_create, name='patient_create'),
     path('<int:patient_id>/patient/', patient_detail, name='patient_detail'),
     path('patient_edit/', patient_edit, name='patient_edit'),
