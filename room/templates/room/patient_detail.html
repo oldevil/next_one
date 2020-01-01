@@ -8,15 +8,30 @@
 <body>
 <div data-role="page">
     <div data-role="header" data-position="fixed">
+        <a href="javascript:window.location.href=document.referrer;" class="ui-btn ui-corner-all ui-shadow ui-icon-back ui-btn-icon-left">后退</a>
         <h1>Next One</h1>
     </div>
     <div data-role="main" class="ui-content">
-        <form name="edit" action="{% url 'room:patient_edit'%}" method="post" data-ajax="false" data-inset="true">
-            姓名: <input type="text" name="name" value="{{ name }}"><br>
-            主刀: <input type="text" name="surgeon" value="{{ surgeon }}"><br>
-            一助: <input type="text" name="assistant" value="{{ assistant }}"><br>
-            手术室: <input type="text" name="room_number" value="{{ room_number }}"><br>
-            {% if id %}<input type="hidden" name="id" value="{{ id }}">{% endif %}
+        <form name="edit" action="{% url 'room:patient_edit'%}" method="post" data-ajax="false" data-inset="true" autocomplete="off">
+            <label for="name">姓名:</label>
+            <input type="text" name="name" id="name" data-clear-btn="true" value="{{ name }}">
+            <label for="surgeon">主诊:</label>
+            <input type="text" name="surgeon" id="surgeon" data-clear-btn="true" value="{{ surgeon }}">
+            <label for="assistant">一助:</label>
+            <input type="text" name="assistant" id="assistant" data-clear-btn="true" value="{{ assistant }}">
+            <label for="room_number">术间:</label>
+            <select name="room_number" id="room_number">
+                <option value="1" {% if room_number == 1 %} selected {% endif %}>1</option>
+                <option value="2" {% if room_number == 2 %} selected {% endif %}>2</option>
+                <option value="3" {% if room_number == 3 %} selected {% endif %}>3</option>
+                <option value="5" {% if room_number == 5 %} selected {% endif %}>5</option>
+                <option value="7" {% if room_number == 7 %} selected {% endif %}>7</option>
+                <option value="8" {% if room_number == 8 %} selected {% endif %}>8</option>
+            </select>
+            {% if id %}
+                <label for="id"></label>
+                <input type="hidden" name="id" id="id" value="{{ id }}">
+            {% endif %}
             <input type="submit" value="{{ submit }}">
         </form>
     </div>

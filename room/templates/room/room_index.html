@@ -16,9 +16,7 @@
                 {% if room.get_next_patient %}
                     <li>
                         <a href="{% url 'room:room_detail' room.id %}" data-ajax="false">
-                            <h1>
-                                OR {{ room.number }}
-                            </h1>
+                            <h1>OR {{ room.number }}</h1>
                             <p>
                                 {% if room.current_patient %}
                                     当前患者：{{ room.current_patient.name}}<br>
@@ -31,16 +29,12 @@
                                 Next One：{{ room.get_next_patient.name }}
                             </p>
                         </a>
-                        <a href="{% url 'room:patient_get_in' room.get_next_patient.id %}" data-ajax="false">
-                            入室
-                        </a>
+                        <a href="{% url 'room:patient_get_in' room.get_next_patient.id %}" data-ajax="false">入室</a>
                     </li>
-                {% else %}
+                    {% else %}
                     <li data-icon="false">
                         <a href="{% url 'room:room_detail' room.id %}" data-ajax="false">
-                            <h1>
-                                OR {{ room.number }}
-                            </h1>
+                            <h1>OR {{ room.number }}</h1>
                             <p>
                                 {% if room.current_patient %}
                                     当前患者：{{ room.current_patient.name}}<br>

@@ -4,20 +4,25 @@
     <link rel="stylesheet" href="http://apps.bdimg.com/libs/jquerymobile/1.4.5/jquery.mobile-1.4.5.min.css">
     <script src="http://apps.bdimg.com/libs/jquery/1.10.2/jquery.min.js"></script>
     <script src="http://apps.bdimg.com/libs/jquerymobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
-    <script src="{% static 'Sortable/Sortable.js' %}"></script>
+    <script src="{% static 'Sortable/Sortable.min.js' %}"></script>
 </head>
 
 <body>
 <div data-role="page">
     <div data-role="header" data-position="fixed">
+        <a href="{% url 'room:room_index' %}" class="ui-btn ui-corner-all ui-shadow ui-icon-back ui-btn-icon-left">后退</a>
         <h1>Next One</h1>
     </div>
     <div data-role="main" class="ui-content">
-    <ul data-role="listview" data-inset="true" data-icon="false" id="items">
-        {% for patient in patients %}
-            <li data-id="{{ patient.id }}"><a href="{% url 'room:patient_detail' patient.id %}" data-ajax="false">{{ patient.name }}</a></li>
-        {% endfor%}
-    </ul>
+        {% if patients %}
+            <ul data-role="listview" data-inset="true" data-icon="false" id="items">
+                {% for patient in patients %}
+                    <li data-id="{{ patient.id }}"><a href="{% url 'room:patient_detail' patient.id %}" data-ajax="false">{{ patient.name }}</a></li>
+                {% endfor%}
+            </ul>
+        {% else %}
+            <p>已经没有病人了</p>
+        {% endif %}
     </div>
     <div data-role="footer" data-position="fixed" style="text-align:center;">
         <button onclick="toggleDrag()" id="toggle">开始排序</button>
