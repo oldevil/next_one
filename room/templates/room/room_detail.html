@@ -17,15 +17,22 @@
         {% if patients %}
             <ul data-role="listview" data-inset="true" data-icon="false" id="items">
                 {% for patient in patients %}
-                    <li data-id="{{ patient.id }}"><a href="{% url 'room:patient_detail' patient.id %}" data-ajax="false">{{ patient.name }}</a></li>
+                    <li data-id="{{ patient.id }}">
+                        <a href="{% url 'room:patient_detail' patient.id %}" data-ajax="false">{{ patient.name }}</a>
+                        <a href="{% url 'room:patient_delete' patient.id %}" data-ajax="false" data-icon="delete"></a>
+                    </li>
                 {% endfor%}
             </ul>
         {% else %}
-            <p>已经没有病人了</p>
+            <p>已经没有患者了</p>
         {% endif %}
+        <form id="newpatient" name="newpatient" action="{% url 'room:patient_create' %}" method="post" data-ajax="false">
+            <input type="hidden" name="room_number" id="room_number" value="{{ room.number }}">
+        </form>
     </div>
     <div data-role="footer" data-position="fixed" style="text-align:center;">
         <button onclick="toggleDrag()" id="toggle">开始排序</button>
+        <button onclick="fsubmit(document.newpatient)">新患者</button>
     </div>
 </div>
 </body>
@@ -44,10 +51,6 @@
                     patient_queue: positions
                 },
             });
-
-            console.log({
-                positions: positions
-            })
         },
     });
 
@@ -55,5 +58,11 @@
         sortable.options.disabled = !sortable.options.disabled;
         let toggle = document.getElementById('toggle');
         toggle.textContent = (toggle.textContent === '开始排序') ? '停止排序' : '开始排序';
+    }
+</script>
+
+<script>
+    function fsubmit(obj){
+        obj.submit();
     }
 </script>

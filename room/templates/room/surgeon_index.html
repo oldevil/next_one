@@ -1,0 +1,36 @@
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="http://apps.bdimg.com/libs/jquerymobile/1.4.5/jquery.mobile-1.4.5.min.css">
+    <script src="http://apps.bdimg.com/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script src="http://apps.bdimg.com/libs/jquerymobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+</head>
+
+<body>
+<div data-role="page">
+    <div data-role="header" data-position="fixed">
+        <a href="{% url 'room:room_index' %}" class="ui-btn ui-corner-all ui-shadow ui-icon-back ui-btn-icon-left">后退</a>
+        <h1>Next One</h1>
+    </div>
+    <div data-role="main" class="ui-content">
+        <ul data-role="listview" data-inset="true">
+            <li data-role="list-divider">前节</li>
+            {% for surgeon in anterior_surgeons %}
+                <li>
+                    <a href="{% url 'room:surgeon_detail' surgeon.id %}" data-ajax="false">{{ surgeon.name }}</a>
+                    <a href="{% url 'room:surgeon_delete' surgeon.id %}" data-ajax="false" data-icon="delete"></a>
+                </li>
+            {% endfor %}
+            <li data-role="list-divider">后节</li>
+            {% for surgeon in posterior_surgeons %}
+                <li>
+                    <a href="{% url 'room:surgeon_detail' surgeon.id %}" data-ajax="false">{{ surgeon.name }}</a>
+                    <a href="{% url 'room:surgeon_delete' surgeon.id %}" data-ajax="false" data-icon="delete"></a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div data-role="footer" data-position="fixed" style="text-align:center;">
+        <a href="{% url 'room:surgeon_create' %}" data-ajax="false">新主诊</a>
+    </div>
+</div>
+</body>

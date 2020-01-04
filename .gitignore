@@ -50,6 +50,7 @@ build/Release
 
 dev.cfg
 dev.yaml
+settings.py
 local_config.py
 test.yaml
 
@@ -76,4 +77,3 @@ package-lock.json
 package.json
 
 # local settings
-bi_aiops/settings/local_hj.py

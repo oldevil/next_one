@@ -13,7 +13,7 @@ logger = logging.getLogger('room')
 
 def room_index(request):
     # return HttpResponse(request.environ['HTTP_USER_AGENT'])
-    rooms = Room.objects.order_by('number')
+    rooms = Room.objects.all()
     context = {
         'rooms': rooms,
     }
