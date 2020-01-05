@@ -12,7 +12,7 @@
         <h1>Next One</h1>
     </div>
     <div data-role="main" class="ui-content">
-        <form name="edit" action="{% url 'room:surgeon_edit'%}" method="post" data-ajax="false" data-inset="true" autocomplete="off">
+        <form id="edit" name="edit" action="{% url 'room:surgeon_edit'%}" method="post" data-ajax="false" data-inset="true" autocomplete="off">
             <fieldset data-role="fieldcontain">
                 <label for="name">姓名:</label>
                 <input type="text" name="name" id="name" data-clear-btn="true" value="{{ name }}">
@@ -26,10 +26,22 @@
                     <input type="hidden" name="id" id="id" value="{{ id }}">
                 {% endif %}
             </fieldset>
-            <input type="submit" value="{{ submit }}">
         </form>
+        <button onclick="fsubmit(document.edit)">{{ submit }}</button>
     </div>
     <div data-role="footer" data-position="fixed" style="text-align:center;">
     </div>
 </div>
 </body>
+
+<script>
+    function fsubmit(obj){
+        if (obj.elements.name.value)
+        {
+            obj.submit();
+        }
+        else {
+            alert("请输入姓名");
+        }
+    }
+</script>

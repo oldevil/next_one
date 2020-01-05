@@ -1,4 +1,5 @@
 from django.db import models
+from room.models.room import Room
 from room.models.surgeon import Surgeon
 from room.models.assistant import Assistant
 
@@ -13,4 +14,5 @@ class Patient(models.Model):
     surgeon = models.ForeignKey(Surgeon, blank=True, null=True, on_delete=models.SET_NULL)
     assistant = models.ForeignKey(Assistant, blank=True, null=True, on_delete=models.SET_NULL)
     status = models.IntegerField('病人状态', choices=STATUS_CHOICES, default=0)
-    room_number = models.IntegerField('手术室编号', blank=True, null=True)
+    room = models.ForeignKey(Room, blank=True, null=True, on_delete=models.SET_NULL)
+    entry_time = models.DateTimeField('入室时间', blank=True, null=True)

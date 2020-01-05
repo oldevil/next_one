@@ -14,35 +14,43 @@
         <h1>Next One</h1>
     </div>
     <div data-role="main" class="ui-content">
-        {% if patients %}
-            <ul data-role="listview" data-inset="true" data-icon="false" id="items">
-                {% for patient in patients %}
-                    <li data-id="{{ patient.id }}">
-                        <a href="{% url 'room:patient_detail' patient.id %}" data-ajax="false">{{ patient.name }}</a>
-                        <a href="{% url 'room:patient_delete' patient.id %}" data-ajax="false" data-icon="delete"></a>
-                    </li>
-                {% endfor%}
-            </ul>
-        {% else %}
-            <p>已经没有患者了</p>
-        {% endif %}
+        <h1>已接：</h1>
+        <ul data-role="listview" data-inset="true" data-icon="false" id="got">
+            {% for patient in patients_got %}
+                <li data-id="{{ patient.id }}" id="{{ patient.id }}">{{ patient.name }}</li>
+            {% endfor %}
+        </ul>
+        <h1>未接：</h1>
+        <ul data-role="listview" data-inset="true" data-icon="false" id="getting">
+            {% for patient in patients %}
+                <li data-id="{{ patient.id }}">
+                    <a href="{% url 'room:patient_detail' patient.id %}" data-ajax="false">{{ patient.name }}</a>
+                    <a href="{% url 'room:patient_delete' patient.id %}" data-ajax="false" data-icon="delete"></a>
+                </li>
+            {% endfor%}
+        </ul>
         <form id="newpatient" name="newpatient" action="{% url 'room:patient_create' %}" method="post" data-ajax="false">
-            <input type="hidden" name="room_number" id="room_number" value="{{ room.number }}">
+            <input type="hidden" name="room_id" id="room_id" value="{{ room.id }}">
         </form>
     </div>
     <div data-role="footer" data-position="fixed" style="text-align:center;">
         <button onclick="toggleDrag()" id="toggle">开始排序</button>
-        <button onclick="fsubmit(document.newpatient)">新患者</button>
+        <button onclick="fsubmit(document.newpatient)">添加患者</button>
     </div>
 </div>
 </body>
 
 <script>
-    let el = document.getElementById('items');
-    let sortable = Sortable.create(el, {
+    let getting = document.getElementById('getting');
+    let sortable_getting = Sortable.create(getting, {
+        group: {
+            name: 'patient',
+            put: true,
+            pull: false,
+        },
         disabled: true,
         onUpdate: function () {
-            let order = sortable.toArray();
+            let order = sortable_getting.toArray();
             let positions = '[' + order.join(', ') + ']';
             jQuery.ajax({
                 url: "{% url 'room:room_update_queue' room.id %}",
@@ -52,12 +60,41 @@
                 },
             });
         },
+        onAdd: function (evt) {
+            let order = sortable_getting.toArray();
+            let positions = '[' + order.join(', ') + ']';
+            jQuery.ajax({
+                url: "{% url 'room:room_roll_back' room.id %}",
+                type: 'POST',
+                data: {
+                    patient_queue: positions,
+                    patient_id: evt.item.id
+                },
+            });
+        }
+    });
+
+    let got = document.getElementById('got');
+    let sortable_got = Sortable.create(got, {
+        sort: false,
+        group: {
+            name: 'patient',
+            put: false,
+            pull: true,
+        },
+        disabled: true,
+        onRemove: function () {
+        }
     });
 
     function toggleDrag() {
-        sortable.options.disabled = !sortable.options.disabled;
+        sortable_getting.options.disabled = !sortable_getting.options.disabled;
+        sortable_got.options.disabled = !sortable_got.options.disabled;
         let toggle = document.getElementById('toggle');
         toggle.textContent = (toggle.textContent === '开始排序') ? '停止排序' : '开始排序';
+        if (toggle.textContent === '开始排序') {
+            location.reload();
+        }
     }
 </script>
 

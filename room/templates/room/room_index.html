@@ -18,13 +18,13 @@
                         <a href="{% url 'room:room_detail' room.id %}" data-ajax="false">
                             <h1>OR {{ room.number }}</h1>
                             <p>
-                                {% if room.current_patient %}
-                                    当前患者：{{ room.current_patient.name }}<br>
-                                    主诊：{{ room.current_patient.surgeon.name }}<br>
-                                    一助：{{ room.current_patient.assistant.name }}<br>
-                                    入室时间：{{ room.entry_time }}<br>
+                                {% if room.get_current_patient %}
+                                    当前患者：{{ room.get_current_patient.name }}<br>
+                                    术者：{{ room.get_current_patient.surgeon.name }}<br>
+                                    一助：{{ room.get_current_patient.assistant.name }}<br>
+                                    入室时间：{{ room.get_current_patient.entry_time }}<br>
                                 {% else %}
-                                    当前患者：无<br>
+                                    Let's get started!<br>
                                 {% endif %}
                                 Next One：{{ room.get_next_patient.name }}
                             </p>
@@ -36,15 +36,15 @@
                         <a href="{% url 'room:room_detail' room.id %}" data-ajax="false">
                             <h1>OR {{ room.number }}</h1>
                             <p>
-                                {% if room.current_patient %}
-                                    当前患者：{{ room.current_patient.name }}<br>
-                                    主诊：{{ room.current_patient.surgeon.name }}<br>
-                                    一助：{{ room.current_patient.assistant.name }}<br>
-                                    入室时间：{{ room.entry_time }}<br>
+                                {% if room.get_current_patient %}
+                                    当前患者：{{ room.get_current_patient.name }}<br>
+                                    术者：{{ room.get_current_patient.surgeon.name }}<br>
+                                    一助：{{ room.get_current_patient.assistant.name }}<br>
+                                    入室时间：{{ room.get_current_patient.entry_time }}<br>
+                                    Next One：Well done!
                                 {% else %}
-                                    当前患者：无<br>
+                                    今日打烊<br>
                                 {% endif %}
-                                Next One：Well done!
                             </p>
                         </a>
                     </li>
@@ -53,9 +53,9 @@
         </ul>
     </div>
     <div data-role="footer" data-position="fixed" style="text-align:center;">
-        <a href="{% url 'room:patient_create' %}" data-ajax="false">新患者</a>
-        <a href="{% url 'room:surgeon_index' %}" data-ajax="false">主诊列表</a>
-        <a href="{% url 'room:assistant_index' %}" data-ajax="false">一助列表</a>
+        <a href="{% url 'room:patient_create' %}" data-ajax="false">添加患者</a>
+        <a href="{% url 'room:surgeon_index' %}" data-ajax="false">术者</a>
+        <a href="{% url 'room:assistant_index' %}" data-ajax="false">一助</a>
     </div>
 </div>
 </body>

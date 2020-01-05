@@ -12,11 +12,11 @@
         <h1>Next One</h1>
     </div>
     <div data-role="main" class="ui-content">
-        <form name="edit" action="{% url 'room:patient_edit'%}" method="post" data-ajax="false" data-inset="true" autocomplete="off">
+        <form id="edit" name="edit" action="{% url 'room:patient_edit'%}" method="post" data-ajax="false" data-inset="true" autocomplete="off">
             <fieldset data-role="fieldcontain">
                 <label for="name">姓名:</label>
                 <input type="text" name="name" id="name" data-clear-btn="true" value="{{ name }}">
-                <label for="surgeon">主诊:</label>
+                <label for="surgeon">术者:</label>
                 <select name="surgeon" id="surgeon">
                     <optgroup label="前节">
                         {% for anterior_surgeon in anterior_surgeons %}
@@ -35,10 +35,10 @@
                         <option value="{{ assist.id }}" {% if assist.id == assistant.id %} selected {% endif %}>{{ assist.name }}</option>
                     {% endfor %}
                 </select>
-                <label for="room_number">术间:</label>
-                <select name="room_number" id="room_number">
+                <label for="room_id">术间:</label>
+                <select name="room_id" id="room_id">
                     {% for room in rooms %}
-                        <option value="{{ room.number }}" {% if room_number == room.number %} selected {% endif %}>{{ room.number }}</option>
+                        <option value="{{ room.id }}" {% if room_id == room.id %} selected {% endif %}>{{ room.number }}</option>
                     {% endfor %}
                 </select>
                 {% if id %}
@@ -48,10 +48,22 @@
                 <label for="redirect"></label>
                 <input type="hidden" name="redirect" id="redirect" value="{{ redirect }}">
             </fieldset>
-            <input type="submit" value="{{ submit }}">
         </form>
+        <button onclick="fsubmit(document.edit)">{{ submit }}</button>
     </div>
     <div data-role="footer" data-position="fixed" style="text-align:center;">
     </div>
 </div>
 </body>
+
+<script>
+    function fsubmit(obj){
+        if (obj.elements.name.value)
+        {
+            obj.submit();
+        }
+        else {
+            alert("请输入姓名");
+        }
+    }
+</script>

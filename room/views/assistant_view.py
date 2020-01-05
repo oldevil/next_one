@@ -45,12 +45,14 @@ def assistant_edit(request):
     assistant.name = request.POST.get('name')
     assistant.email = request.POST.get('email')
     assistant.save()
+
     log_detail = {
         'id': assistant.id,
         'type': Type.SUCCESS,
         'detail': detail
     }
     logger.info(log_detail)
+
     return HttpResponseRedirect(reverse('room:assistant_index'))
 
 
@@ -66,4 +68,13 @@ def assistant_index(request):
 def assistant_delete(request, assistant_id):
     assistant = Assistant.objects.get(pk=assistant_id)
     assistant.delete()
+
+    detail = Success.ASSISTANT_DELETED
+    log_detail = {
+        'id': assistant.id,
+        'type': Type.SUCCESS,
+        'detail': detail
+    }
+    logger.info(log_detail)
+
     return HttpResponseRedirect(reverse('room:assistant_index'))
