@@ -8,6 +8,7 @@ class Success:
     PATIENT_EDITED = '患者修改成功'
     PATIENT_GOT_IN = '患者接入成功'
     PATIENT_DELETED = '患者删除成功'
+    PATIENT_GOT_DELETED = '已接患者全部删除成功'
 
     SURGEON_CREATED = '术者创建成功'
     SURGEON_EDITED = '术者修改成功'

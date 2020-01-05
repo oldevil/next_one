@@ -1,6 +1,6 @@
 from django.urls import path
 
-from room.views.patient_view import patient_detail, patient_create, patient_edit, patient_get_in, patient_delete
+from room.views.patient_view import patient_detail, patient_create, patient_edit, patient_get_in, patient_delete, patient_delete_got_patients
 from room.views.room_view import room_index, room_detail, room_update_queue, room_roll_back
 from room.views.surgeon_view import surgeon_detail, surgeon_create, surgeon_edit, surgeon_index, surgeon_delete
 from room.views.assistant_view import assistant_detail, assistant_create, assistant_edit, assistant_index, assistant_delete
@@ -17,6 +17,7 @@ urlpatterns = [
     path('patient_edit/', patient_edit, name='patient_edit'),
     path('<int:patient_id>/patient_get_in/', patient_get_in, name='patient_get_in'),
     path('<int:patient_id>/patient_delete/', patient_delete, name='patient_delete'),
+    path('patient_delete_got_patients/', patient_delete_got_patients, name='patient_delete_got_patients'),
     path('surgeon_index/', surgeon_index, name='surgeon_index'),
     path('surgeon/', surgeon_create, name='surgeon_create'),
     path('<int:surgeon_id>/surgeon/', surgeon_detail, name='surgeon_detail'),

@@ -156,3 +156,20 @@ def patient_delete(request, patient_id):
     logger.info(log_detail)
 
     return HttpResponseRedirect(reverse('room:room_detail', kwargs={'room_id': patient.room.id}))
+
+
+def patient_delete_got_patients(request):
+    patients = Patient.objects.filter(status=1)
+    for patient in patients:
+        patient.room.remove_got_queue(patient.id)
+        patient.delete()
+
+    detail = Success.PATIENT_GOT_DELETED
+    log_detail = {
+        'id': [patient.id for patient in patients],
+        'type': Type.SUCCESS,
+        'detail': detail,
+    }
+    logger.info(log_detail)
+
+    return HttpResponse(detail, status.HTTP_200_OK)
