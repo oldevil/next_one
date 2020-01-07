@@ -2,7 +2,6 @@ import logging
 
 from room.models.surgeon import Surgeon
 from django.http import HttpResponse, HttpResponseRedirect
-from rest_framework import status
 from django.template import loader
 from utils.detail import Type, Success, Error
 from django.urls import reverse
@@ -36,12 +35,10 @@ def surgeon_edit(request):
     if request.POST.get('id'):
         surgeon = Surgeon.objects.get(pk=request.POST.get('id'))
         detail = Success.SURGEON_EDITED
-        status_code = status.HTTP_200_OK
     else:
         surgeon = Surgeon.objects.create()
         surgeon.save()
         detail = Success.SURGEON_CREATED
-        status_code = status.HTTP_201_CREATED
     surgeon.name = request.POST.get('name')
     surgeon.segment = request.POST.get('segment')
     surgeon.save()

@@ -2,7 +2,6 @@ import logging
 
 from room.models.assistant import Assistant
 from django.http import HttpResponse, HttpResponseRedirect
-from rest_framework import status
 from django.template import loader
 from utils.detail import Type, Success, Error
 from django.urls import reverse
@@ -36,12 +35,10 @@ def assistant_edit(request):
     if request.POST.get('id'):
         assistant = Assistant.objects.get(pk=request.POST.get('id'))
         detail = Success.ASSISTANT_EDITED
-        status_code = status.HTTP_200_OK
     else:
         assistant = Assistant.objects.create()
         assistant.save()
         detail = Success.ASSISTANT_CREATED
-        status_code = status.HTTP_201_CREATED
     assistant.name = request.POST.get('name')
     assistant.email = request.POST.get('email')
     assistant.save()

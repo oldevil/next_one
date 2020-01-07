@@ -1,6 +1,8 @@
 import logging
 import datetime
+import ast
 
+from datetime import date
 from room.models.patient import Patient
 from room.models.room import Room
 from room.models.assistant import Assistant
@@ -9,6 +11,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from rest_framework import status
 from django.template import loader
 from utils.detail import Type, Success, Error
+from utils.date_util import next_workday, today_is_workday
 from django.urls import reverse
 from django.core.mail import send_mail
 
@@ -27,6 +30,7 @@ def patient_detail(request, patient_id):
         'surgeon': patient.surgeon,
         'assistant': patient.assistant,
         'room_id': patient.room.id,
+        'operation_date': str(patient.operation_date),
         'rooms': rooms,
         'assistants': assistants,
         'anterior_surgeons': anterior_surgeons,
@@ -54,6 +58,7 @@ def patient_create(request):
         'surgeon': '',
         'assistant': '',
         'room_id': room_id,
+        'operation_date': str(next_workday()),
         'rooms': rooms,
         'assistants': assistants,
         'anterior_surgeons': anterior_surgeons,
@@ -66,26 +71,38 @@ def patient_create(request):
 
 
 def patient_edit(request):
+    room_id = int(request.POST.get('room_id'))
+    room = Room.objects.get(pk=room_id)
+    operation_date = request.POST.get('operation_date')
+    if operation_date:
+        operation_date = date.fromisoformat(operation_date)
+    else:
+        operation_date = None
+    if operation_date == date.today():
+        patient_status = 0
+    elif operation_date == next_workday():
+        patient_status = 2
+    else:
+        patient_status = 3
+
     if request.POST.get('id'):
         patient = Patient.objects.get(pk=request.POST.get('id'))
         detail = Success.PATIENT_EDITED
-        status_code = status.HTTP_200_OK
+        if patient.room.id != room.id or patient.operation_date != operation_date:
+            if patient.status in (0, 2):
+                patient.room.remove_queue(patient.id)
+            if patient_status == 0:
+                room.append_queue(patient.id)
+            elif patient_status == 2:
+                room.append_queue(patient.id, 'patient_tomorrow_queue')
     else:
         patient = Patient.objects.create()
         patient.save()
-        detail = Success.PATIENT_CREATED
-        status_code = status.HTTP_201_CREATED
-
-    room_id = int(request.POST.get('room_id'))
-    room = Room.objects.get(pk=room_id)
-    if patient.room:
-        if patient.room.id != room_id:
-            patient.room.remove_queue(patient.id)
+        if patient_status == 0:
             room.append_queue(patient.id)
-            patient.room = room
-    else:
-        room.append_queue(patient.id)
-        patient.room = room
+        elif patient_status == 2:
+            room.append_queue(patient.id, 'patient_tomorrow_queue')
+        detail = Success.PATIENT_CREATED
 
     patient.name = request.POST.get('name')
     surgeon = request.POST.get('surgeon')
@@ -94,6 +111,9 @@ def patient_edit(request):
     assistant = request.POST.get('assistant')
     if assistant:
         patient.assistant = Assistant.objects.get(pk=assistant)
+    patient.status = patient_status
+    patient.room = room
+    patient.operation_date = operation_date
     patient.save()
 
     log_detail = {
@@ -114,6 +134,8 @@ def patient_get_in(request, patient_id):
     patient = Patient.objects.get(pk=patient_id)
     patient.status = 1
     patient.entry_time = datetime.datetime.now()
+    patient.room.remove_queue(patient.id)
+    patient.room.append_queue(patient_id, 'patient_got_queue')
     patient.save()
 
     # if patient.assistant:
@@ -128,9 +150,6 @@ def patient_get_in(request, patient_id):
     #     except Exception:
     #         pass
 
-    patient.room.remove_queue(patient.id)
-    patient.room.append_got_queue(patient_id)
-
     detail = Success.PATIENT_GOT_IN
     log_detail = {
         'id': patient.id,
@@ -144,7 +163,8 @@ def patient_get_in(request, patient_id):
 
 def patient_delete(request, patient_id):
     patient = Patient.objects.get(pk=patient_id)
-    patient.room.remove_queue(patient.id)
+    if patient.status in (0, 2):
+        patient.room.remove_queue(patient.id)
     patient.delete()
 
     detail = Success.PATIENT_DELETED
@@ -158,10 +178,10 @@ def patient_delete(request, patient_id):
     return HttpResponseRedirect(reverse('room:room_detail', kwargs={'room_id': patient.room.id}))
 
 
-def patient_delete_got_patients(request):
+def patient_delete_got_patients():
     patients = Patient.objects.filter(status=1)
     for patient in patients:
-        patient.room.remove_got_queue(patient.id)
+        patient.room.remove_queue(patient.id)
         patient.delete()
 
     detail = Success.PATIENT_GOT_DELETED
@@ -172,4 +192,55 @@ def patient_delete_got_patients(request):
     }
     logger.info(log_detail)
 
-    return HttpResponse(detail, status.HTTP_200_OK)
+
+def patient_check_tomorrow_queue():
+    rooms = Room.objects.all()
+    patient_ids = []
+    if today_is_workday():
+        for room in rooms:
+            patient_tomorrow_queue = ast.literal_eval(room.patient_tomorrow_queue)
+            patient_queue = ast.literal_eval(room.patient_queue)
+            patient_queue.extend(patient_tomorrow_queue)
+            room.patient_queue = str(patient_queue)
+            room.patient_tomorrow_queue = '[]'
+            room.save()
+            for patient_id in patient_tomorrow_queue:
+                patient_ids.append(patient_id)
+                patient = Patient.objects.get(pk=patient_id)
+                patient.status = 0
+                patient.save()
+
+    detail = Success.PATIENT_TOMORROW_QUEUE_CHECKED
+    log_detail = {
+        'id': patient_ids,
+        'type': Type.SUCCESS,
+        'detail': detail,
+    }
+    logger.info(log_detail)
+
+
+def patient_check_project():
+    patients = Patient.objects.filter(status=3)
+    patient_ids = []
+    for patient in patients:
+        if patient.operation_date == next_workday():
+            patient_ids.append(patient.id)
+            patient.room.append_queue(patient.id, 'patient_tomorrow_queue')
+            patient.status = 2
+            patient.save()
+
+    detail = Success.PATIENT_PROJECT_CHECKED
+    log_detail = {
+        'id': patient_ids,
+        'type': Type.SUCCESS,
+        'detail': detail,
+    }
+    logger.info(log_detail)
+
+
+def patient_daily_check(request):
+    patient_delete_got_patients()
+    patient_check_tomorrow_queue()
+    patient_check_project()
+
+    return HttpResponse(status=status.HTTP_200_OK)

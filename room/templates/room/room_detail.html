@@ -23,11 +23,29 @@
         <h1>未接：</h1>
         <ul data-role="listview" data-inset="true" data-icon="false" id="getting">
             {% for patient in patients %}
-                <li data-id="{{ patient.id }}">
+                <li data-id="{{ patient.id }}" id="{{ patient.id }}">
                     <a href="{% url 'room:patient_detail' patient.id %}" data-ajax="false">{{ patient.name }}</a>
                     <a href="{% url 'room:patient_delete' patient.id %}" data-ajax="false" data-icon="delete"></a>
                 </li>
             {% endfor%}
+        </ul>
+        <h1>明日：</h1>
+        <ul data-role="listview" data-inset="true" data-icon="false" id="tomorrow">
+            {% for patient in patients_tomorrow %}
+                <li data-id="{{ patient.id }}" id="{{ patient.id }}">
+                    <a href="{% url 'room:patient_detail' patient.id %}" data-ajax="false">{{ patient.name }}</a>
+                    <a href="{% url 'room:patient_delete' patient.id %}" data-ajax="false" data-icon="delete"></a>
+                </li>
+            {% endfor %}
+        </ul>
+        <h1>计划：</h1>
+        <ul data-role="listview" data-inset="true" data-icon="false" id="project">
+            {% for patient in patients_in_project %}
+                <li data-id="{{ patient.id }}" id="{{ patient.id }}">
+                    <a href="{% url 'room:patient_detail' patient.id %}" data-ajax="false">{{ patient.name }}</a>
+                    <a href="{% url 'room:patient_delete' patient.id %}" data-ajax="false" data-icon="delete"></a>
+                </li>
+            {% endfor %}
         </ul>
         <form id="newpatient" name="newpatient" action="{% url 'room:patient_create' %}" method="post" data-ajax="false">
             <input type="hidden" name="room_id" id="room_id" value="{{ room.id }}">
@@ -44,9 +62,9 @@
     let getting = document.getElementById('getting');
     let sortable_getting = Sortable.create(getting, {
         group: {
-            name: 'patient',
-            put: true,
-            pull: false,
+            name: 'getting',
+            put: ['got', 'tomorrow', 'project'],
+            pull: ['tomorrow', 'project'],
         },
         disabled: true,
         onUpdate: function () {
@@ -56,7 +74,8 @@
                 url: "{% url 'room:room_update_queue' room.id %}",
                 type: 'POST',
                 data: {
-                    patient_queue: positions
+                    queue: positions,
+                    target: 'patient_queue',
                 },
             });
         },
@@ -64,32 +83,91 @@
             let order = sortable_getting.toArray();
             let positions = '[' + order.join(', ') + ']';
             jQuery.ajax({
-                url: "{% url 'room:room_roll_back' room.id %}",
+                url: "{% url 'room:room_update_queue' room.id %}",
                 type: 'POST',
                 data: {
-                    patient_queue: positions,
-                    patient_id: evt.item.id
+                    queue: positions,
+                    target: 'patient_queue',
+                    patient_id: evt.item.id,
+                    status: 0,
                 },
             });
-        }
+        },
     });
 
     let got = document.getElementById('got');
     let sortable_got = Sortable.create(got, {
         sort: false,
         group: {
-            name: 'patient',
+            name: 'got',
             put: false,
-            pull: true,
+            pull: ['getting', 'tomorrow', 'project'],
         },
         disabled: true,
-        onRemove: function () {
-        }
+    });
+
+    let tomorrow = document.getElementById('tomorrow');
+    let sortable_tomorrow = Sortable.create(tomorrow, {
+        group: {
+            name: 'tomorrow',
+            put: ['got', 'getting', 'project'],
+            pull: ['getting', 'project'],
+        },
+        disabled: true,
+        onUpdate: function () {
+            let order = sortable_tomorrow.toArray();
+            let positions = '[' + order.join(', ') + ']';
+            jQuery.ajax({
+                url: "{% url 'room:room_update_queue' room.id %}",
+                type: 'POST',
+                data: {
+                    queue: positions,
+                    target: 'patient_tomorrow_queue',
+                },
+            });
+        },
+        onAdd: function (evt) {
+            let order = sortable_tomorrow.toArray();
+            let positions = '[' + order.join(', ') + ']';
+            jQuery.ajax({
+                url: "{% url 'room:room_update_queue' room.id %}",
+                type: 'POST',
+                data: {
+                    queue: positions,
+                    target: 'patient_tomorrow_queue',
+                    patient_id: evt.item.id,
+                    status: 2,
+                },
+            });
+        },
+    });
+
+    let project = document.getElementById('project');
+    let sortable_project = Sortable.create(project, {
+        sort: false,
+        group: {
+            name: 'project',
+            put: ['got', 'getting', 'tomorrow'],
+            pull: ['getting', 'tomorrow'],
+        },
+        disabled: true,
+        onAdd: function (evt) {
+            jQuery.ajax({
+                url: "{% url 'room:room_update_queue' room.id %}",
+                type: 'POST',
+                data: {
+                    patient_id: evt.item.id,
+                    status: 3,
+                },
+            });
+        },
     });
 
     function toggleDrag() {
         sortable_getting.options.disabled = !sortable_getting.options.disabled;
         sortable_got.options.disabled = !sortable_got.options.disabled;
+        sortable_tomorrow.options.disabled = !sortable_tomorrow.options.disabled;
+        sortable_project.options.disabled = !sortable_project.options.disabled;
         let toggle = document.getElementById('toggle');
         toggle.textContent = (toggle.textContent === '开始排序') ? '停止排序' : '开始排序';
         if (toggle.textContent === '开始排序') {
