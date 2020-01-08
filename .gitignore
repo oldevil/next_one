@@ -50,7 +50,7 @@ build/Release
 
 dev.cfg
 dev.yaml
-settings.py
+config.py
 local_config.py
 test.yaml
 
