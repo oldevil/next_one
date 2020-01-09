@@ -29,7 +29,7 @@
                                 Next One：{{ room.get_next_patient.name }}
                             </p>
                         </a>
-                        <a href="{% url 'room:patient_get_in' room.get_next_patient.id %}" data-ajax="false">入室</a>
+                        <a href="javascript:void(0);" onclick="patient_get_in({{ room.id }}, {{ room.get_next_patient.id }})">入室</a>
                     </li>
                     {% else %}
                     <li data-icon="false">
@@ -59,3 +59,24 @@
     </div>
 </div>
 </body>
+
+<script>
+    function patient_get_in(room_id, patient_id) {
+        jQuery.ajax({
+            url: "{% url 'room:patient_get_in' %}",
+            type: 'POST',
+            dataType: 'text',
+            data: {
+                room_id: room_id,
+                patient_id: patient_id,
+            },
+            success: function () {
+                location.reload();
+            },
+            error: function (data) {
+                alert(data.responseText);
+                location.reload();
+            }
+        });
+    }
+</script>

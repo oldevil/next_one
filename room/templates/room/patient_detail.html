@@ -62,7 +62,21 @@
     function fsubmit(obj){
         if (obj.elements.name.value)
         {
-            obj.submit();
+            jQuery.ajax({
+                url: "{% url 'room:room_cache_api' %}",
+                type: 'POST',
+                dataType: 'text',
+                data: {
+                    operation: "get",
+                    key: "room_" + obj.elements.room_id.value + "_sorting",
+                },
+                success: function () {
+                    obj.submit();
+                },
+                error: function (data) {
+                    alert(data.responseText);
+                }
+            });
         }
         else {
             alert("请输入姓名");

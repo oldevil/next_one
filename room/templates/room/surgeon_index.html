@@ -17,14 +17,14 @@
             {% for surgeon in anterior_surgeons %}
                 <li>
                     <a href="{% url 'room:surgeon_detail' surgeon.id %}" data-ajax="false">{{ surgeon.name }}</a>
-                    <a href="{% url 'room:surgeon_delete' surgeon.id %}" data-ajax="false" data-icon="delete"></a>
+                    <a href="javascript:void(0);" data-icon="delete" onclick="delete_surgeon({{ surgeon.id }})"></a>
                 </li>
             {% endfor %}
             <li data-role="list-divider">后节</li>
             {% for surgeon in posterior_surgeons %}
                 <li>
                     <a href="{% url 'room:surgeon_detail' surgeon.id %}" data-ajax="false">{{ surgeon.name }}</a>
-                    <a href="{% url 'room:surgeon_delete' surgeon.id %}" data-ajax="false" data-icon="delete"></a>
+                    <a href="javascript:void(0);" data-icon="delete" onclick="delete_surgeon({{ surgeon.id }})"></a>
                 </li>
             {% endfor %}
         </ul>
@@ -34,3 +34,23 @@
     </div>
 </div>
 </body>
+
+<script>
+    function delete_surgeon(surgeon_id) {
+        jQuery.ajax({
+            url: "{% url 'room:surgeon_delete' %}",
+            type: 'POST',
+            dataType: 'text',
+            data: {
+                surgeon_id: surgeon_id,
+            },
+            success: function () {
+                location.reload();
+            },
+            error: function (data) {
+                alert(data.responseText);
+                location.reload();
+            }
+        });
+    }
+</script>

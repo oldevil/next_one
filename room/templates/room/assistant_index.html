@@ -16,7 +16,7 @@
             {% for assistant in assistants %}
                 <li>
                     <a href="{% url 'room:assistant_detail' assistant.id %}" data-ajax="false">{{ assistant.name }}</a>
-                    <a href="{% url 'room:assistant_delete' assistant.id %}" data-ajax="false" data-icon="delete"></a>
+                    <a href="javascript:void(0);" data-icon="delete" onclick="delete_assistant({{ assistant.id }})"></a>
                 </li>
             {% endfor %}
         </ul>
@@ -26,3 +26,23 @@
     </div>
 </div>
 </body>
+
+<script>
+    function delete_assistant(assistant_id) {
+        jQuery.ajax({
+            url: "{% url 'room:assistant_delete' %}",
+            type: 'POST',
+            dataType: 'text',
+            data: {
+                assistant_id: assistant_id,
+            },
+            success: function () {
+                location.reload();
+            },
+            error: function (data) {
+                alert(data.responseText);
+                location.reload();
+            }
+        });
+    }
+</script>

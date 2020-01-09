@@ -1,22 +1,27 @@
 import logging
 
-from room.models.surgeon import Surgeon
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
-from utils.detail import Type, Success, Error
 from django.urls import reverse
+from django.db.models import ObjectDoesNotExist
+from rest_framework import status
+from room.models.surgeon import Surgeon
+from utils.detail import Type, Success, Error, Message
 
 logger = logging.getLogger('surgeon')
 
 
 def surgeon_detail(request, surgeon_id):
-    surgeon = Surgeon.objects.get(pk=surgeon_id)
-    context = {
-        'id': surgeon_id,
-        'name': surgeon.name,
-        'segment': surgeon.segment,
-        'submit': '修改',
-    }
+    try:
+        surgeon = Surgeon.objects.get(pk=surgeon_id)
+        context = {
+            'id': surgeon_id,
+            'name': surgeon.name,
+            'segment': surgeon.segment,
+            'submit': '修改',
+        }
+    except ObjectDoesNotExist:
+        return HttpResponseRedirect(reverse('room:surgeon_index'))
     template = loader.get_template('room/surgeon_detail.html')
     return HttpResponse(template.render(context, request))
 
@@ -33,8 +38,11 @@ def surgeon_create(request):
 
 def surgeon_edit(request):
     if request.POST.get('id'):
-        surgeon = Surgeon.objects.get(pk=request.POST.get('id'))
-        detail = Success.SURGEON_EDITED
+        try:
+            surgeon = Surgeon.objects.get(pk=request.POST.get('id'))
+            detail = Success.SURGEON_EDITED
+        except ObjectDoesNotExist:
+            return HttpResponseRedirect(reverse('room:surgeon_index'))
     else:
         surgeon = Surgeon.objects.create()
         surgeon.save()
@@ -64,16 +72,26 @@ def surgeon_index(request):
     return HttpResponse(template.render(context, request))
 
 
-def surgeon_delete(request, surgeon_id):
-    surgeon = Surgeon.objects.get(pk=surgeon_id)
-    surgeon.delete()
+def surgeon_delete(request):
+    surgeon_id = int(request.POST.get('surgeon_id'))
+    try:
+        surgeon = Surgeon.objects.get(pk=surgeon_id)
+        surgeon.delete()
+        log_type = Type.SUCCESS
+        detail = Success.SURGEON_DELETED
+        message = detail
+        status_code = status.HTTP_200_OK
+    except ObjectDoesNotExist:
+        log_type = Type.ERROR
+        detail = Error.SURGEON_ALREADY_DELETED
+        message = Message.SURGEON_ALREADY_DELETED
+        status_code = status.HTTP_404_NOT_FOUND
 
-    detail = Success.SURGEON_DELETED
     log_detail = {
-        'id': surgeon.id,
-        'type': Type.SUCCESS,
+        'id': surgeon_id,
+        'type': log_type,
         'detail': detail
     }
     logger.info(log_detail)
 
-    return HttpResponseRedirect(reverse('room:surgeon_index'))
+    return HttpResponse(message, status=status_code)

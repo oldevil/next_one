@@ -89,6 +89,16 @@ DATABASES = {
 }
 
 
+# Caches
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': '/var/tmp/django_cache',
+    }
+}
+
+
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
 
@@ -135,7 +145,13 @@ STATIC_ROOT = os.path.join(BASE_DIR, STATIC_URL)
 
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
+
+# Logging
+
 logging.basicConfig(filename='log/next_one.log', format='[%(asctime)s] [%(levelname)s] [%(name)s] [%(message)s]', level='INFO')
+
+
+# Email
 
 EMAIL_HOST = email_config['EMAIL_HOST']
 

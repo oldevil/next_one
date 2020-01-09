@@ -24,8 +24,8 @@
         <ul data-role="listview" data-inset="true" data-icon="false" id="getting">
             {% for patient in patients %}
                 <li data-id="{{ patient.id }}" id="{{ patient.id }}">
-                    <a href="{% url 'room:patient_detail' patient.id %}" data-ajax="false">{{ patient.name }}</a>
-                    <a href="{% url 'room:patient_delete' patient.id %}" data-ajax="false" data-icon="delete"></a>
+                    <a href="{% url 'room:patient_detail' room.id patient.id %}" data-ajax="false">{{ patient.name }}</a>
+                    <a href="javascript:void(0);" data-icon="delete" onclick="delete_patient({{ patient.id }})"></a>
                 </li>
             {% endfor%}
         </ul>
@@ -33,8 +33,8 @@
         <ul data-role="listview" data-inset="true" data-icon="false" id="tomorrow">
             {% for patient in patients_tomorrow %}
                 <li data-id="{{ patient.id }}" id="{{ patient.id }}">
-                    <a href="{% url 'room:patient_detail' patient.id %}" data-ajax="false">{{ patient.name }}</a>
-                    <a href="{% url 'room:patient_delete' patient.id %}" data-ajax="false" data-icon="delete"></a>
+                    <a href="{% url 'room:patient_detail' room.id patient.id %}" data-ajax="false">{{ patient.name }}</a>
+                    <a href="javascript:void(0);" data-icon="delete" onclick="delete_patient({{ patient.id }})"></a>
                 </li>
             {% endfor %}
         </ul>
@@ -42,8 +42,8 @@
         <ul data-role="listview" data-inset="true" data-icon="false" id="project">
             {% for patient in patients_in_project %}
                 <li data-id="{{ patient.id }}" id="{{ patient.id }}">
-                    <a href="{% url 'room:patient_detail' patient.id %}" data-ajax="false">{{ patient.name }}</a>
-                    <a href="{% url 'room:patient_delete' patient.id %}" data-ajax="false" data-icon="delete"></a>
+                    <a href="{% url 'room:patient_detail' room.id patient.id %}" data-ajax="false">{{ patient.name }}</a>
+                    <a href="javascript:void(0);" data-icon="delete" onclick="delete_patient({{ patient.id }})"></a>
                 </li>
             {% endfor %}
         </ul>
@@ -59,6 +59,40 @@
 </body>
 
 <script>
+    ts = Date.now();
+
+    function delete_patient(patient_id) {
+        jQuery.ajax({
+            url: "{% url 'room:patient_delete' %}",
+            type: 'POST',
+            dataType: 'text',
+            data: {
+                room_id: {{ room.id }},
+                patient_id: patient_id,
+            },
+            success: function () {
+                location.reload();
+            },
+            error: function (data) {
+                alert(data.responseText);
+                location.reload();
+            }
+        });
+    }
+
+    function update_queue(data) {
+        jQuery.ajax({
+            url: "{% url 'room:room_update_queue' room.id %}",
+            type: 'POST',
+            dataType: 'text',
+            data,
+            error: function (data) {
+                alert(data.responseText);
+                location.reload();
+            },
+        });
+    }
+
     let getting = document.getElementById('getting');
     let sortable_getting = Sortable.create(getting, {
         group: {
@@ -70,28 +104,24 @@
         onUpdate: function () {
             let order = sortable_getting.toArray();
             let positions = '[' + order.join(', ') + ']';
-            jQuery.ajax({
-                url: "{% url 'room:room_update_queue' room.id %}",
-                type: 'POST',
-                data: {
-                    queue: positions,
-                    target: 'patient_queue',
-                },
-            });
+            let data = {
+                value: ts,
+                queue: positions,
+                target: 'patient_queue',
+            };
+            update_queue(data);
         },
         onAdd: function (evt) {
             let order = sortable_getting.toArray();
             let positions = '[' + order.join(', ') + ']';
-            jQuery.ajax({
-                url: "{% url 'room:room_update_queue' room.id %}",
-                type: 'POST',
-                data: {
-                    queue: positions,
-                    target: 'patient_queue',
-                    patient_id: evt.item.id,
-                    status: 0,
-                },
-            });
+            let data = {
+                value: ts,
+                queue: positions,
+                target: 'patient_queue',
+                patient_id: evt.item.id,
+                status: 0,
+            };
+            update_queue(data);
         },
     });
 
@@ -117,28 +147,24 @@
         onUpdate: function () {
             let order = sortable_tomorrow.toArray();
             let positions = '[' + order.join(', ') + ']';
-            jQuery.ajax({
-                url: "{% url 'room:room_update_queue' room.id %}",
-                type: 'POST',
-                data: {
-                    queue: positions,
-                    target: 'patient_tomorrow_queue',
-                },
-            });
+            let data = {
+                value: ts,
+                queue: positions,
+                target: 'patient_tomorrow_queue',
+            };
+            update_queue(data);
         },
         onAdd: function (evt) {
             let order = sortable_tomorrow.toArray();
             let positions = '[' + order.join(', ') + ']';
-            jQuery.ajax({
-                url: "{% url 'room:room_update_queue' room.id %}",
-                type: 'POST',
-                data: {
-                    queue: positions,
-                    target: 'patient_tomorrow_queue',
-                    patient_id: evt.item.id,
-                    status: 2,
-                },
-            });
+            let data = {
+                value: ts,
+                queue: positions,
+                target: 'patient_tomorrow_queue',
+                patient_id: evt.item.id,
+                status: 2,
+            };
+            update_queue(data);
         },
     });
 
@@ -152,27 +178,60 @@
         },
         disabled: true,
         onAdd: function (evt) {
-            jQuery.ajax({
-                url: "{% url 'room:room_update_queue' room.id %}",
-                type: 'POST',
-                data: {
-                    patient_id: evt.item.id,
-                    status: 3,
-                },
-            });
+            let data = {
+                value: ts,
+                patient_id: evt.item.id,
+                status: 3,
+            };
+            update_queue(data);
         },
     });
 
     function toggleDrag() {
+        let toggle = document.getElementById('toggle');
+        if (toggle.textContent === '开始排序') {
+            jQuery.ajax({
+                url: "{% url 'room:room_cache_api' %}",
+                type: 'POST',
+                dataType: "text",
+                data: {
+                    operation: 'get_or_set',
+                    key: "room_{{ room.id }}_sorting",
+                    value: ts,
+                },
+                success: function () {
+                    localStorage.setItem('sort_tag', ts.toString());
+                    location.reload();
+                },
+                error: function (data) {
+                    alert(data.responseText);
+                }
+            });
+        }
+        else {
+            jQuery.ajax({
+                url: "{% url 'room:room_cache_api' %}",
+                type: 'POST',
+                dataType: "text",
+                data: {
+                    operation: 'delete',
+                    key: "room_{{ room.id }}_sorting",
+                    value: ts,
+                },
+            });
+            location.reload();
+        }
+    }
+
+    if (localStorage.getItem('sort_tag')) {
+        ts = parseInt(localStorage.getItem('sort_tag'));
+        localStorage.removeItem('sort_tag');
         sortable_getting.options.disabled = !sortable_getting.options.disabled;
         sortable_got.options.disabled = !sortable_got.options.disabled;
         sortable_tomorrow.options.disabled = !sortable_tomorrow.options.disabled;
         sortable_project.options.disabled = !sortable_project.options.disabled;
         let toggle = document.getElementById('toggle');
-        toggle.textContent = (toggle.textContent === '开始排序') ? '停止排序' : '开始排序';
-        if (toggle.textContent === '开始排序') {
-            location.reload();
-        }
+        toggle.textContent = '停止排序';
     }
 </script>
 
