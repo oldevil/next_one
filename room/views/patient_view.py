@@ -156,8 +156,6 @@ def patient_get_in(request):
     else:
         try:
             patient = Patient.objects.get(pk=patient_id)
-            logger.info(room.get_current_patient().id)
-            logger.info(patient_id)
             assert room.get_next_patient() and room.get_next_patient().id == patient_id
             patient.status = 1
             patient.entry_time = datetime.datetime.now()
