@@ -163,6 +163,15 @@ def patient_get_in(request):
             patient.room.append_queue(patient_id, 'patient_got_queue')
             patient.save()
 
+            if patient.assistant:
+                send_mail(
+                    '{}间患者{}已接'.format(patient.room.number, patient.name),
+                    '请不要迟到，喵~',
+                    'Next-one-Admin-J<1010301308@pku.edu.cn>',
+                    [patient.assistant.email],
+                    fail_silently=False,
+                )
+
             log_type = Type.SUCCESS
             detail = Success.PATIENT_GOT_IN
             message = detail
@@ -177,18 +186,6 @@ def patient_get_in(request):
             detail = Error.PATIENT_NOT_IN_QUEUE
             message = Message.PATIENT_NOT_IN_QUEUE
             status_code = status.HTTP_404_NOT_FOUND
-
-        # if patient.assistant:
-        #     try:
-        #         send_mail(
-        #             '{}间患者{}已接'.format(patient.room.number, patient.name),
-        #             '请不要迟到，喵~',
-        #             'Next-one-Admin-J<1010301308@pku.edu.cn>',
-        #             [patient.assistant.email],
-        #             fail_silently=False,
-        #         )
-        #     except Exception:
-        #         pass
 
     log_detail = {
         'id': patient_id,

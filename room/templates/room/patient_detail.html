@@ -41,7 +41,7 @@
                         <option value="{{ room.id }}" {% if room_id == room.id %} selected {% endif %}>{{ room.number }}</option>
                     {% endfor %}
                 </select>
-                <label for="operation_date">手术日:</label>
+                <label for="operation_date">手术日期:</label>
                 <input type="date" name="operation_date" id="operation_date" data-clear-btn="true" value="{{ operation_date }}">
                 {% if id %}
                     <label for="id"></label>
