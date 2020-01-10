@@ -1,15 +1,19 @@
+{% load staticfiles %}
 <head>
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="shortcut icon" sizes="128x128" href="{% static '/img/favicon.png' %}">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="http://apps.bdimg.com/libs/jquerymobile/1.4.5/jquery.mobile-1.4.5.min.css">
     <script src="http://apps.bdimg.com/libs/jquery/1.10.2/jquery.min.js"></script>
     <script src="http://apps.bdimg.com/libs/jquerymobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+    <title>Next One</title>
 </head>
 
 <body>
 <div data-role="page">
     <div data-role="header" data-position="fixed">
         <a href="javascript:void(0);" class="ui-btn ui-corner-all ui-shadow ui-icon-back ui-btn-icon-left" data-ajax="false" onclick="window.location.href=document.referrer;">后退</a>
-        <h1>Next One</h1>
+        <h1>{{ submit }}一助</h1>
     </div>
     <div data-role="main" class="ui-content">
         <form id="edit" name="edit" action="{% url 'room:assistant_edit'%}" method="post" data-ajax="false" data-inset="true" autocomplete="off">
