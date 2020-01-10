@@ -16,10 +16,12 @@ from room.models.assistant import Assistant
 from room.models.surgeon import Surgeon
 from utils.detail import Type, Success, Error, Message
 from utils.date_util import next_workday, today_is_workday
+from utils.decorators import logit
 
 logger = logging.getLogger('patient')
 
 
+@logit
 def patient_detail(request, patient_id, room_id):
     rooms = Room.objects.all()
     assistants = Assistant.objects.all()
@@ -47,6 +49,7 @@ def patient_detail(request, patient_id, room_id):
     return HttpResponse(template.render(context, request))
 
 
+@logit
 def patient_create(request):
     rooms = Room.objects.all()
     assistants = Assistant.objects.all()
@@ -75,6 +78,7 @@ def patient_create(request):
     return HttpResponse(template.render(context, request))
 
 
+@logit
 def patient_edit(request):
     room_id = int(request.POST.get('room_id'))
     room = Room.objects.get(pk=room_id)
@@ -144,6 +148,7 @@ def patient_edit(request):
         return HttpResponseRedirect(reverse('room:room_detail', kwargs={'room_id': room_id}))
 
 
+@logit
 def patient_get_in(request):
     room_id = int(request.POST.get('room_id'))
     patient_id = int(request.POST.get('patient_id'))
@@ -197,6 +202,7 @@ def patient_get_in(request):
     return HttpResponse(message, status=status_code)
 
 
+@logit
 def patient_delete(request):
     room_id = int(request.POST.get('room_id'))
     patient_id = int(request.POST.get('patient_id'))
@@ -297,6 +303,7 @@ def patient_check_project():
     logger.info(log_detail)
 
 
+@logit
 def patient_daily_check(request):
     patient_delete_got_patients()
     patient_check_tomorrow_queue()

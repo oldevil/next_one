@@ -10,11 +10,13 @@ from room.models.patient import Patient
 from room.models.room import Room
 from utils.detail import Type, Success, Error, Message
 from utils.date_util import next_workday
+from utils.decorators import logit
 from conf.config import cache_ttl
 
 logger = logging.getLogger('room')
 
 
+@logit
 def room_index(request):
     rooms = Room.objects.all()
     context = {
@@ -24,6 +26,7 @@ def room_index(request):
     return HttpResponse(template.render(context, request))
 
 
+@logit
 def room_detail(request, room_id):
     room = Room.objects.get(pk=room_id)
     patient_queue = ast.literal_eval(room.patient_queue)
@@ -44,6 +47,7 @@ def room_detail(request, room_id):
     return HttpResponse(template.render(context, request))
 
 
+@logit
 def room_update_queue(request, room_id):
     room = Room.objects.get(pk=room_id)
     key = 'room_{}_sorting'.format(room.id)
@@ -90,6 +94,7 @@ def room_update_queue(request, room_id):
     return HttpResponse(message, status=status_code)
 
 
+@logit
 def room_cache_api(request):
     operation = request.POST.get('operation')
     key = request.POST.get('key')

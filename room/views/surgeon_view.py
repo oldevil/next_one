@@ -7,10 +7,12 @@ from django.db.models import ObjectDoesNotExist
 from rest_framework import status
 from room.models.surgeon import Surgeon
 from utils.detail import Type, Success, Error, Message
+from utils.decorators import logit
 
 logger = logging.getLogger('surgeon')
 
 
+@logit
 def surgeon_detail(request, surgeon_id):
     try:
         surgeon = Surgeon.objects.get(pk=surgeon_id)
@@ -26,6 +28,7 @@ def surgeon_detail(request, surgeon_id):
     return HttpResponse(template.render(context, request))
 
 
+@logit
 def surgeon_create(request):
     context = {
         'name': '',
@@ -36,6 +39,7 @@ def surgeon_create(request):
     return HttpResponse(template.render(context, request))
 
 
+@logit
 def surgeon_edit(request):
     if request.POST.get('id'):
         try:
@@ -61,6 +65,7 @@ def surgeon_edit(request):
     return HttpResponseRedirect(reverse('room:surgeon_index'))
 
 
+@logit
 def surgeon_index(request):
     anterior_surgeons = Surgeon.objects.filter(segment=0)
     posterior_surgeons = Surgeon.objects.filter(segment=1)
@@ -72,6 +77,7 @@ def surgeon_index(request):
     return HttpResponse(template.render(context, request))
 
 
+@logit
 def surgeon_delete(request):
     surgeon_id = int(request.POST.get('surgeon_id'))
     try:

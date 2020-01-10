@@ -7,10 +7,12 @@ from django.db.models import ObjectDoesNotExist
 from rest_framework import status
 from room.models.assistant import Assistant
 from utils.detail import Type, Success, Error, Message
+from utils.decorators import logit
 
 logger = logging.getLogger('assistant')
 
 
+@logit
 def assistant_detail(request, assistant_id):
     try:
         assistant = Assistant.objects.get(pk=assistant_id)
@@ -26,6 +28,7 @@ def assistant_detail(request, assistant_id):
     return HttpResponse(template.render(context, request))
 
 
+@logit
 def assistant_create(request):
     context = {
         'name': '',
@@ -36,6 +39,7 @@ def assistant_create(request):
     return HttpResponse(template.render(context, request))
 
 
+@logit
 def assistant_edit(request):
     if request.POST.get('id'):
         try:
@@ -61,6 +65,7 @@ def assistant_edit(request):
     return HttpResponseRedirect(reverse('room:assistant_index'))
 
 
+@logit
 def assistant_index(request):
     assistants = Assistant.objects.all()
     context = {
@@ -70,6 +75,7 @@ def assistant_index(request):
     return HttpResponse(template.render(context, request))
 
 
+@logit
 def assistant_delete(request):
     assistant_id = int(request.POST.get('assistant_id'))
     try:
